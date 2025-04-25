@@ -1,38 +1,74 @@
-// src/components/DoctorCard.js
+// DoctorCard.js
 import React from "react";
 
-function DoctorCard({ doctor }) {
+export default function DoctorCard({ doctor }) {
   return (
-    <div className="doctor-card">
-      <div className="doctor-info">
-        <div className="doctor-image">
-          <img src={doctor.image} alt={doctor.name} />
-        </div>
-        <div className="doctor-details">
-          <h3 className="doctor-name">{doctor.name}</h3>
-          <p className="doctor-specialty">{doctor.specialty}</p>
-          <p className="doctor-qualifications">{doctor.qualifications}</p>
-          <p className="doctor-experience">{doctor.experience} yrs exp.</p>
-          <div className="doctor-location">
-            <div className="clinic-info">
-              <i className="fa fa-hospital-o"></i>
-              <span>{doctor.clinic}</span>
-            </div>
-            <div className="location-info">
-              <i className="fa fa-map-marker"></i>
-              <span>{doctor.location}</span>
-            </div>
+    <div
+      data-testid="doctor-card"
+      style={{
+        background: "#fff",
+        borderRadius: 8,
+        padding: 24,
+        marginBottom: 24,
+        display: "flex",
+        alignItems: "flex-start",
+        justifyContent: "space-between",
+      }}
+    >
+      <div style={{ display: "flex", gap: 18 }}>
+        <img
+          src={doctor.photo}
+          alt={doctor.name}
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: "50%",
+            objectFit: "cover",
+          }}
+        />
+        <div>
+          <div
+            data-testid="doctor-name"
+            style={{ fontWeight: 600, fontSize: 18, marginBottom: 2 }}
+          >
+            {doctor.name}
+          </div>
+          <div
+            data-testid="doctor-specialty"
+            style={{ color: "#444", marginBottom: 2 }}
+          >
+            {doctor.specialties?.join(", ")}
+          </div>
+          <div
+            data-testid="doctor-experience"
+            style={{ color: "#666", fontSize: 15 }}
+          >
+            {doctor.experience} yrs exp.
           </div>
         </div>
       </div>
-      <div className="doctor-fee-booking">
-        <div className="doctor-fee">
-          <span>₹ {doctor.fee}</span>
+      <div style={{ textAlign: "right" }}>
+        <div
+          data-testid="doctor-fee"
+          style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}
+        >
+          ₹ {doctor.fees}
         </div>
-        <button className="book-appointment-btn">Book Appointment</button>
+        <button
+          style={{
+            border: "1.5px solid #1752a6",
+            color: "#1752a6",
+            background: "#fff",
+            padding: "10px 28px",
+            borderRadius: 4,
+            fontWeight: 600,
+            fontSize: 15,
+            cursor: "pointer",
+          }}
+        >
+          Book Appointment
+        </button>
       </div>
     </div>
   );
 }
-
-export default DoctorCard;

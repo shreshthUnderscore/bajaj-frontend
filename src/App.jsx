@@ -1,108 +1,153 @@
-// src/App.js
-import React, { useState } from "react";
-import SearchBar from "./components/SearchBar";
-import FiltersSidebar from "./components/FiltersSidebar";
-import SortSection from "./components/SortSection";
+import React, { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import AutocompleteSearchBar from "./components/AutocompleteSearchBar";
+import FilterPanel from "./components/FilterPanel";
 import DoctorList from "./components/DoctorList";
-import "./App.css";
 
-// Dummy data for doctors
-const doctorsData = [
-  {
-    id: 1,
-    name: "Dr. Munaf Inamdar",
-    specialty: "General Physician",
-    qualifications: "MBBS, MD-General Medicine",
-    experience: 27,
-    clinic: "Apex Multispeciality and Mater...",
-    location: "Kondhawa Khurd",
-    fee: 600,
-    image: "https://randomuser.me/api/portraits/men/32.jpg",
-    mode: "In-clinic Consultation",
-  },
-  {
-    id: 2,
-    name: "Dr. Subhash Bajaj",
-    specialty: "General Physician",
-    qualifications: "MBBS, Diploma in Cardiology",
-    experience: 11,
-    clinic: "Dr. Bajaj Wellness Clinic",
-    location: "Wanowarie",
-    fee: 600,
-    image: "https://randomuser.me/api/portraits/men/33.jpg",
-    mode: "In-clinic Consultation",
-  },
-  {
-    id: 3,
-    name: "Dr. Mufaddal Zakir",
-    specialty: "General Physician",
-    qualifications: "MBBS",
-    experience: 27,
-    clinic: "Sparsh Polyclinic.",
-    location: "Wanwadi",
-    fee: 600,
-    image: "https://randomuser.me/api/portraits/men/34.jpg",
-    mode: "In-clinic Consultation",
-  },
-  {
-    id: 4,
-    name: "Dr. Ajay Gangoli",
-    specialty: "General Physician",
-    qualifications: "MBBS",
-    experience: 34,
-    clinic: "Niramaya Clinic",
-    location: "Wanowarie",
-    fee: 400,
-    image: "https://randomuser.me/api/portraits/men/35.jpg",
-    mode: "In-clinic Consultation",
-  },
+const API_URL = "https://srijandubey.github.io/campus-api-mock/SRM-C1-25.json"; //env file later maybe
+
+const ALL_SPECIALTIES = [
+  "General Physician",
+  "Dentist",
+  "Dermatologist",
+  "Paediatrician",
+  "Gynaecologist",
+  "ENT",
+  "Diabetologist",
+  "Cardiologist",
+  "Physiotherapist",
+  "Endocrinologist",
+  "Orthopaedic",
+  "Ophthalmologist",
+  "Gastroenterologist",
+  "Pulmonologist",
+  "Psychiatrist",
+  "Urologist",
+  "Dietitian/Nutritionist",
+  "Psychologist",
+  "Sexologist",
+  "Nephrologist",
+  "Neurologist",
+  "Oncologist",
+  "Ayurveda",
+  "Homeopath",
 ];
 
-function App() {
-  const [search, setSearch] = useState("");
-  const [selectedSpecialties, setSelectedSpecialties] = useState([]);
-  const [mode, setMode] = useState("In-clinic Consultation");
-  const [sort, setSort] = useState("");
+export default function App() {
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filtering logic
-  const filteredDoctors = doctorsData
-    .filter((doc) =>
-      search
-        ? doc.name.toLowerCase().includes(search.toLowerCase()) ||
-          doc.specialty.toLowerCase().includes(search.toLowerCase())
-        : true
-    )
-    .filter((doc) =>
-      selectedSpecialties.length > 0
-        ? selectedSpecialties.includes(doc.specialty)
-        : true
-    )
-    .filter((doc) => (mode === "All" ? true : doc.mode === mode))
-    .sort((a, b) => {
-      if (sort === "price") return a.fee - b.fee;
-      if (sort === "experience") return b.experience - a.experience;
-      return 0;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const search = searchParams.get("search") || "";
+  const mode = searchParams.get("mode") || "";
+  const specialties = searchParams.get("specialties")
+    ? searchParams.get("specialties").split(",").filter(Boolean)
+    : [];
+  const sort = searchParams.get("sort") || "";
+
+  useEffect(() => {
+    fetch(API_URL)
+      .then((r) => r.json())
+      .then((data) => {
+        setDoctors(data);
+        setLoading(false);
+      });
+  }, []);
+
+  const filteredDoctors = useMemo(() => {
+    let filtered = [...doctors];
+
+    
+    if (search) {
+      filtered = filtered.filter((doc) =>
+        doc.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    // 2. Mode filter
+    if (mode === "Video Consult") {
+      filtered = filtered.filter((doc) => doc.mode === "Video Consult");
+    } else if (mode === "In Clinic") {
+      filtered = filtered.filter((doc) => doc.mode === "In Clinic");
+    }
+
+    // 3. Specialties (multi)
+    if (specialties.length > 0) {
+      filtered = filtered.filter((doc) =>
+        specialties.some((sp) => doc.specialties?.includes(sp))
+      );
+    }
+
+    // 4. Sort
+    if (sort === "fees") {
+      filtered.sort((a, b) => a.fees - b.fees);
+    } else if (sort === "experience") {
+      filtered.sort((a, b) => b.experience - a.experience);
+    }
+
+    return filtered;
+  }, [doctors, search, mode, specialties, sort]);
+
+  function handleSearch(newSearch) {
+    setSearchParams((params) => {
+      if (newSearch) params.set("search", newSearch);
+      else params.delete("search");
+      return params;
     });
+  }
+  function handleMode(newMode) {
+    setSearchParams((params) => {
+      if (newMode) params.set("mode", newMode);
+      else params.delete("mode");
+      return params;
+    });
+  }
+  function handleSpecialties(newSpecs) {
+    setSearchParams((params) => {
+      if (newSpecs.length) params.set("specialties", newSpecs.join(","));
+      else params.delete("specialties");
+      return params;
+    });
+  }
+  function handleSort(newSort) {
+    setSearchParams((params) => {
+      if (newSort) params.set("sort", newSort);
+      else params.delete("sort");
+      return params;
+    });
+  }
+
+  // For autocomplete suggestions
+  const doctorNames = useMemo(() => doctors.map((d) => d.name), [doctors]);
 
   return (
-    <div className="app-bg">
-      <SearchBar onSearch={setSearch} />
-      <div className="main-content">
-        <div className="sidebar">
-          <SortSection sort={sort} setSort={setSort} />
-          <FiltersSidebar
-            selectedSpecialties={selectedSpecialties}
-            setSelectedSpecialties={setSelectedSpecialties}
-            mode={mode}
-            setMode={setMode}
-          />
-        </div>
-        <div className="doctors-list-section">
-          <DoctorList doctors={filteredDoctors} />
+    <div style={{ background: "#f3f6f8", minHeight: "100vh" }}>
+      <div style={{ background: "#1752a6", padding: 16 }}>
+        <AutocompleteSearchBar
+          value={search}
+          suggestions={doctorNames}
+          onSelect={handleSearch}
+        />
+      </div>
+      <div style={{ display: "flex", maxWidth: 1400, margin: "24px auto" }}>
+        <FilterPanel
+          mode={mode}
+          onMode={handleMode}
+          specialties={specialties}
+          onSpecialties={handleSpecialties}
+          sort={sort}
+          onSort={handleSort}
+          allSpecialties={ALL_SPECIALTIES}
+        />
+        <div style={{ flex: 1, marginLeft: 24 }}>
+          {loading ? (
+            <div>Loading...</div>
+          ) : (
+            <DoctorList doctors={filteredDoctors} />
+          )}
         </div>
       </div>
     </div>
   );
 }
-
-export default App;
