@@ -1,4 +1,7 @@
-/* src/App.css */
+body {
+  margin: 0px;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,7 +15,6 @@
   padding-bottom: 30px;
 }
 
-/* Search Bar Styles */
 .search-container {
   background-color: #1a56db;
   padding: 15px 0;
@@ -45,7 +47,6 @@
   cursor: pointer;
 }
 
-/* Main Content Layout */
 .main-content {
   display: flex;
   width: 80%;
@@ -63,7 +64,6 @@
   flex-grow: 1;
 }
 
-/* Sort Section Styles */
 .sort-section {
   background-color: white;
   border-radius: 8px;
@@ -91,7 +91,6 @@
   gap: 10px;
 }
 
-/* Filters Sidebar Styles */
 .filters-sidebar {
   background-color: white;
   border-radius: 8px;
@@ -156,7 +155,6 @@
   gap: 10px;
 }
 
-/* Doctor List Styles */
 .doctor-list {
   display: flex;
   flex-direction: column;
@@ -170,7 +168,6 @@
   border-radius: 8px;
 }
 
-/* Doctor Card Styles */
 .doctor-card {
   background-color: white;
   border-radius: 8px;
@@ -256,7 +253,6 @@
   color: white;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;

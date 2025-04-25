@@ -3,8 +3,9 @@ import { useSearchParams } from "react-router-dom";
 import AutocompleteSearchBar from "./components/AutocompleteSearchBar";
 import FilterPanel from "./components/FilterPanel";
 import DoctorList from "./components/DoctorList";
+import styles from "./styles/App.module.css";
 
-const API_URL = "https://srijandubey.github.io/campus-api-mock/SRM-C1-25.json"; //env file later maybe
+const API_URL = "https://srijandubey.github.io/campus-api-mock/SRM-C1-25.json";
 
 const ALL_SPECIALTIES = [
   "General Physician",
@@ -36,14 +37,17 @@ const ALL_SPECIALTIES = [
 export default function App() {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [searchParams, setSearchParams] = useSearchParams();
 
   const search = searchParams.get("search") || "";
   const mode = searchParams.get("mode") || "";
-  const specialties = searchParams.get("specialties")
-    ? searchParams.get("specialties").split(",").filter(Boolean)
-    : [];
+  const specialties = useMemo(
+    () =>
+      searchParams.get("specialties")
+        ? searchParams.get("specialties").split(",").filter(Boolean)
+        : [],
+    [searchParams]
+  );
   const sort = searchParams.get("sort") || "";
 
   useEffect(() => {
@@ -61,76 +65,104 @@ export default function App() {
     fetchData();
   }, []);
 
-  let filteredDoctors = [...doctors];
+  const getFeeValue = (feeString) => {
+    const match = feeString.match(/\d+/);
+    return match ? parseInt(match[0], 10) : 0;
+  };
 
-  if (search) {
-    filteredDoctors = filteredDoctors.filter((doc) =>
-      doc.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }
+  const getExperienceValue = (expString) => {
+    const match = expString.match(/(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+  };
 
-  if (mode === "Video Consult") {
-    filteredDoctors = filteredDoctors.filter(
-      (doc) => doc.mode === "Video Consult"
-    );
-  } else if (mode === "In Clinic") {
-    filteredDoctors = filteredDoctors.filter((doc) => doc.mode === "In Clinic");
-  }
+  const filteredDoctors = useMemo(() => {
+    let filtered = [...doctors];
 
-  if (specialties.length > 0) {
-    filteredDoctors = filteredDoctors.filter((doc) =>
-      specialties.some((sp) => doc.specialties?.includes(sp))
-    );
-  }
+    if (search) {
+      filtered = filtered.filter((doc) =>
+        doc.name.toLowerCase().includes(search.toLowerCase())
+      );
+    }
 
-  if (sort === "fees") {
-    filteredDoctors.sort((a, b) => a.fees - b.fees);
-  } else if (sort === "experience") {
-    filteredDoctors.sort((a, b) => b.experience - a.experience);
-  }
+    if (mode) {
+      filtered = filtered.filter((doc) => {
+        if (mode === "Video Consult") {
+          return doc.video_consult;
+        } else if (mode === "In Clinic") {
+          return doc.in_clinic;
+        }
+        return true;
+      });
+    }
 
-  function handleSearch(newSearch) {
+    if (specialties.length > 0) {
+      filtered = filtered.filter((doc) =>
+        specialties.some((sp) =>
+          doc.specialities?.some(
+            (docSp) => docSp.name.toLowerCase() === sp.toLowerCase()
+          )
+        )
+      );
+    }
+
+    if (sort === "fees") {
+      filtered = [...filtered].sort(
+        (a, b) => getFeeValue(a.fees) - getFeeValue(b.fees)
+      );
+    } else if (sort === "experience") {
+      filtered = [...filtered].sort(
+        (a, b) =>
+          getExperienceValue(b.experience) - getExperienceValue(a.experience)
+      );
+    }
+
+    return filtered;
+  }, [doctors, search, mode, specialties, sort]);
+
+  const handleSearch = (newSearch) => {
     setSearchParams((params) => {
       if (newSearch) params.set("search", newSearch);
       else params.delete("search");
       return params;
     });
-  }
-  function handleMode(newMode) {
+  };
+
+  const handleMode = (newMode) => {
     setSearchParams((params) => {
       if (newMode) params.set("mode", newMode);
       else params.delete("mode");
       return params;
     });
-  }
-  function handleSpecialties(newSpecs) {
+  };
+
+  const handleSpecialties = (newSpecs) => {
     setSearchParams((params) => {
       if (newSpecs.length) params.set("specialties", newSpecs.join(","));
       else params.delete("specialties");
       return params;
     });
-  }
-  function handleSort(newSort) {
+  };
+
+  const handleSort = (newSort) => {
     setSearchParams((params) => {
       if (newSort) params.set("sort", newSort);
       else params.delete("sort");
       return params;
     });
-  }
+  };
 
-  // For autocomplete suggestions
   const doctorNames = useMemo(() => doctors.map((d) => d.name), [doctors]);
 
   return (
-    <div style={{ background: "#f3f6f8", minHeight: "100vh" }}>
-      <div style={{ background: "#1752a6", padding: 16 }}>
+    <div className={styles.container}>
+      <div className={styles.searchHeader}>
         <AutocompleteSearchBar
           value={search}
           suggestions={doctorNames}
           onSelect={handleSearch}
         />
       </div>
-      <div style={{ display: "flex", maxWidth: 1400, margin: "24px auto" }}>
+      <div className={styles.mainContent}>
         <FilterPanel
           mode={mode}
           onMode={handleMode}
@@ -140,9 +172,9 @@ export default function App() {
           onSort={handleSort}
           allSpecialties={ALL_SPECIALTIES}
         />
-        <div style={{ flex: 1, marginLeft: 24 }}>
+        <div className={styles.doctorsSection}>
           {loading ? (
-            <div>Loading...</div>
+            <div className={styles.loadingState}>Loading...</div>
           ) : (
             <DoctorList doctors={filteredDoctors} />
           )}
