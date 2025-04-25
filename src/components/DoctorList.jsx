@@ -1,4 +1,3 @@
-// DoctorList.js
 import React from "react";
 import DoctorCard from "./DoctorCard";
 import styles from "../styles/DoctorList.module.css";
