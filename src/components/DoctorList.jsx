@@ -1,18 +1,22 @@
+// DoctorList.js
 import React from "react";
 import DoctorCard from "./DoctorCard";
+import styles from "../styles/DoctorList.module.css";
 
-function DoctorList({ doctors }) {
+export default function DoctorList({ doctors }) {
+  if (!doctors.length) {
+    return (
+      <div className={styles.noResults}>
+        No doctors found matching your criteria
+      </div>
+    );
+  }
+
   return (
-    <div className="doctor-list">
-      {doctors.length === 0 ? (
-        <div className="no-results">
-          <p>No doctors found matching your criteria.</p>
-        </div>
-      ) : (
-        doctors.map((doctor) => <DoctorCard key={doctor.id} doctor={doctor} />)
-      )}
+    <div className={styles.container}>
+      {doctors.map((doctor) => (
+        <DoctorCard key={doctor.id} doctor={doctor} />
+      ))}
     </div>
   );
 }
-
-export default DoctorList;
