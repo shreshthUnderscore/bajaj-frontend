@@ -1,0 +1,27 @@
+.container {
+  background: #f3f6f8;
+  min-height: 100vh;
+}
+
+.searchHeader {
+  background: #1752a6;
+  padding: 16px;
+}
+
+.mainContent {
+  display: flex;
+  max-width: 1400px;
+  margin: 24px auto;
+}
+
+.doctorsSection {
+  flex: 1;
+  margin-left: 24px;
+}
+
+.loadingState {
+  background: #fff;
+  padding: 32px;
+  border-radius: 8px;
+  text-align: center;
+}
