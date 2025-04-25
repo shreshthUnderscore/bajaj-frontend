@@ -14,6 +14,7 @@ export default function AutocompleteSearchBar({
     .filter((suggestion) =>
       suggestion.toLowerCase().includes(inputValue.toLowerCase())
     )
+
     .slice(0, 3);
 
   const handleInputChange = (e) => {
