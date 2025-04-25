@@ -2,6 +2,7 @@
 import React from "react";
 
 export default function DoctorCard({ doctor }) {
+  console.log(doctor.specialties);
   return (
     <div
       data-testid="doctor-card"
@@ -37,7 +38,7 @@ export default function DoctorCard({ doctor }) {
             data-testid="doctor-specialty"
             style={{ color: "#444", marginBottom: 2 }}
           >
-            {doctor.specialties?.join(", ")}
+            {doctor.specialties}
           </div>
           <div
             data-testid="doctor-experience"

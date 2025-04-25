@@ -47,47 +47,47 @@ export default function App() {
   const sort = searchParams.get("sort") || "";
 
   useEffect(() => {
-    fetch(API_URL)
-      .then((r) => r.json())
-      .then((data) => {
-        setDoctors(data);
+    async function fetchData() {
+      try {
+        const response = await fetch(API_URL);
+        const result = await response.json();
+        setDoctors(result);
         setLoading(false);
-      });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    fetchData();
   }, []);
 
-  const filteredDoctors = useMemo(() => {
-    let filtered = [...doctors];
+  let filteredDoctors = [...doctors];
 
-    
-    if (search) {
-      filtered = filtered.filter((doc) =>
-        doc.name.toLowerCase().includes(search.toLowerCase())
-      );
-    }
+  if (search) {
+    filteredDoctors = filteredDoctors.filter((doc) =>
+      doc.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }
 
-    // 2. Mode filter
-    if (mode === "Video Consult") {
-      filtered = filtered.filter((doc) => doc.mode === "Video Consult");
-    } else if (mode === "In Clinic") {
-      filtered = filtered.filter((doc) => doc.mode === "In Clinic");
-    }
+  if (mode === "Video Consult") {
+    filteredDoctors = filteredDoctors.filter(
+      (doc) => doc.mode === "Video Consult"
+    );
+  } else if (mode === "In Clinic") {
+    filteredDoctors = filteredDoctors.filter((doc) => doc.mode === "In Clinic");
+  }
 
-    // 3. Specialties (multi)
-    if (specialties.length > 0) {
-      filtered = filtered.filter((doc) =>
-        specialties.some((sp) => doc.specialties?.includes(sp))
-      );
-    }
+  if (specialties.length > 0) {
+    filteredDoctors = filteredDoctors.filter((doc) =>
+      specialties.some((sp) => doc.specialties?.includes(sp))
+    );
+  }
 
-    // 4. Sort
-    if (sort === "fees") {
-      filtered.sort((a, b) => a.fees - b.fees);
-    } else if (sort === "experience") {
-      filtered.sort((a, b) => b.experience - a.experience);
-    }
-
-    return filtered;
-  }, [doctors, search, mode, specialties, sort]);
+  if (sort === "fees") {
+    filteredDoctors.sort((a, b) => a.fees - b.fees);
+  } else if (sort === "experience") {
+    filteredDoctors.sort((a, b) => b.experience - a.experience);
+  }
 
   function handleSearch(newSearch) {
     setSearchParams((params) => {
